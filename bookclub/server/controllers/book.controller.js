@@ -1,16 +1,35 @@
 const BooksSchema=require("../models/book.model");
+const verifyToken=require("../middlewares/authMiddleware")
+
+
 
 //create new book 
+
 module.exports.CreateNewBook = (req, res) => {
-    BooksSchema.create(req.body)
-      .then(CreateBook => {
-        console.log(req.body);  // Moved console.log here
-        console.log(CreateBook);
-        res.json({ newBook: CreateBook });
-      })
-      .catch(err => {
-        res.json({ message: "Wait a minute", err });
-      });
+    // Use the verifyToken middleware to protect this route
+    verifyToken(req, res, async () => {
+      try {
+        // Access the user from req.user (provided by verifyToken)
+        const user = req.user;
+  
+        // Create a new book with the user information
+        const newBook = new BooksSchema({
+          title: req.body.title,
+          description: req.body.description,
+          addedBy: user ? user.id : null, // Use user.id instead of user._id
+          // other book fields...
+        });
+  
+        // Save the new book
+        const savedBook = await newBook.save();
+  
+        console.log(savedBook);
+        res.json({ newBook: savedBook });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
+    });
   };
 
 //read all 

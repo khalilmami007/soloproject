@@ -6,20 +6,15 @@ require("dotenv").config();
 
 exports.register = async (req, res) => {
   try {
-    console.log("Request Body:", req.body);
-
     const { firstname, lastname, email, password, confirmPassword } = req.body;
 
-    console.log("Password:", password);
-    console.log("Confirm Password:", confirmPassword);
-
-    // Check if the passwords match
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
+
     const existingUser = await RegisterSchema.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "user already exists" });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -33,7 +28,9 @@ exports.register = async (req, res) => {
     });
     await newRegister.save();
 
-    res.status(201).json({ message: "user registered successfully" });
+    // Generate a token after successful registration
+    const token = jwt.sign({ RegisterId: newRegister._id }, process.env.JWT_SECRET, { expiresIn: '3h' });
+    res.status(201).json({ message: "User registered successfully", token });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -58,7 +55,6 @@ try{
 
     // Generate a token
     const token = jwt.sign({ RegisterId: Register._id }, process.env.JWT_SECRET, { expiresIn: '3h' });
-
     res.status(200).json({ token });
   } catch (error) {
     console.error(error);

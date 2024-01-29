@@ -4,5 +4,5 @@ module.exports=(app)=>{
 
     app.post('/api/register',authController.register);
     app.post('/api/login',authController.login);
-    app.post('api/logout',authController.logout);
+    app.post('/api/logout',authController.logout);
 }

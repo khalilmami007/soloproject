@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const Auth = ({ setCurrentUser }) => {
+const Auth = () => {
     const navigate=useNavigate();
   const [formData, setFormData] = useState({
     firstname: '',
@@ -71,6 +71,10 @@ const Auth = ({ setCurrentUser }) => {
 
     try {
       const response = await axios.post('http://localhost:5000/api/register', formData);
+      const token = response.data.token;
+
+      // Save the token in localStorage
+      localStorage.setItem('authToken', token);
       console.log(response.data);
       navigate('/books');
     } catch (error) {
@@ -88,6 +92,10 @@ const Auth = ({ setCurrentUser }) => {
 
     try {
       const response = await axios.post('http://localhost:5000/api/login', formData);
+      const token = response.data.token;
+
+      // Save the token in localStorage
+      localStorage.setItem('authToken', token);
       console.log(response.data);
 
       navigate('/books');
@@ -97,6 +105,7 @@ const Auth = ({ setCurrentUser }) => {
       console.error(error.response.data.message);
       // Handle error (show error message or redirect)
     }
+    
   };
 
   return (
