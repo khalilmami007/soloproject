@@ -1,5 +1,6 @@
 const BooksSchema=require("../models/book.model");
-const verifyToken=require("../middlewares/authMiddleware")
+const verifyToken=require("../middlewares/authMiddleware");
+
 
 
 
@@ -72,14 +73,21 @@ module.exports.deleteAnExistingBook = (req, res) => {
 
 //? UPDATE
 
-module.exports.updateExistingBook = (req, res) => {
-    console.log(req.body);
-    BooksSchema.findOneAndUpdate({ _id: req.params.BookId }, req.body, { new: true, runValidators: true })
-        .then(result => {
-            res.json({ "done": result })
-        })
-        .catch((err) => {
-            res.json(err)
-        })
+module.exports.updateExistingBook = async (req, res) => {
+    try {
+        console.log('Updating book with ID:', req.params.BookId);
+        console.log('Update data:', req.body);
 
-}
+        const updatedBook = await BooksSchema.findOneAndUpdate(
+            { _id: req.params.BookId },
+            req.body,
+            { new: true, runValidators: true }
+        );
+
+        console.log('Updated book:', updatedBook);
+        res.json({ done: true, updatedBook });
+    } catch (error) {
+        console.error('Update error:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};

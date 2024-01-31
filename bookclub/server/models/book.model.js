@@ -12,10 +12,10 @@ const Books=new mongoose.Schema(
             minlength:[5,"description mus be at least 5 characters"],
 
         },
-        addedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'RegisterSchema', // Change this to 'RegisterSchema'
-          },
+        // addedBy: {
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: 'RegisterSchema', // Change this to 'RegisterSchema'
+        //   },
     },{timestamps:true}
 );
 

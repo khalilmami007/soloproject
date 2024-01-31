@@ -93,9 +93,9 @@ const Books = () => {
 
       <h2>Books</h2>
       <ul>
-        {books.map((book) => (
-          <li key={book._id}>
-            <strong>{book.title}</strong>: {book.description}
+          {books.map((book) => (
+            <li key={book._id} onClick={() => navigate(`/books/${book._id}`)}>
+              <strong>{book.title}</strong>: {book.description}
           </li>
         ))}
       </ul>
