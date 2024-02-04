@@ -10,10 +10,14 @@ const Books = () => {
   });
 
   const [books, setBooks] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    // Fetch books when the component mounts
     fetchBooks();
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      fetchCurrentUser(token);
+    }
   }, []);
 
   const fetchBooks = async () => {
@@ -22,6 +26,19 @@ const Books = () => {
       setBooks(response.data);
     } catch (error) {
       console.error('Error fetching books:', error.message);
+    }
+  };
+
+  const fetchCurrentUser = async (token) => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/currentUser', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCurrentUser(response.data);
+    } catch (error) {
+      console.error('Error fetching current user:', error.message);
     }
   };
 
@@ -34,37 +51,87 @@ const Books = () => {
     e.preventDefault();
 
     try {
-      // Retrieve the token from localStorage
       const token = localStorage.getItem('authToken');
-
-      // Include the token in the headers of the axios POST request
-      await axios.post('http://localhost:5000/api/book', newBook, {
+      const response = await axios.post('http://localhost:5000/api/book', newBook, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      // Refetch books after creating a new one
       fetchBooks();
 
-      // Clear the form by resetting the state
+      if (currentUser) {
+        const updatedUser = await axios.patch(
+          'http://localhost:5000/api/updateFavorites',
+          {
+            bookId: response.data.newBook._id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setCurrentUser(updatedUser.data);
+      }
+
       setNewBook({ title: '', description: '' });
     } catch (error) {
       console.error('Error creating book:', error.message);
-      // Handle error (show error message or redirect)
     }
   };
 
   const handleLogout = () => {
-    // Clear the token from localStorage
     localStorage.removeItem('authToken');
-
-    // Redirect to the home page or login page
     navigate('/');
   };
 
+  const handleBookClick = (bookId, addedByUserId) => {
+    const fullName = `${currentUser.firstname} ${currentUser.lastname}`;
+    if (currentUser && fullName === addedByUserId) {
+      navigate(`/books/${bookId}`);
+    } else {
+      navigate(`/favorite/${bookId}`);
+    }
+  };
+
+  const handleAddFavorite = async (bookId) => {
+    try {
+      const token = localStorage.getItem('authToken');
+  
+      // Add the book to favorites
+      const response = await axios.post(
+        'http://localhost:5000/api/addFavorite',
+        {
+          bookId: bookId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      // Check if the book is added to favorites (response.data.favorites is true)
+      if (response.data.favorites === true) {
+        // Update the current user's favorites
+        setCurrentUser((prevUser) => ({
+          ...prevUser,
+          favorites: true, // Set favorites to true
+        }));
+      } else {
+        // Handle the case when the book is not added to favorites
+        console.log('Book could not be added to favorites.');
+      }
+    } catch (error) {
+      console.error('Error adding favorite:', error.message);
+    }
+  };
   return (
     <div>
+      {currentUser && <h2>Welcome, {currentUser.firstname} {currentUser.lastname}!</h2>}
+
       <h2>Create a New Book</h2>
       <form onSubmit={handleCreateBook}>
         <label>
@@ -93,12 +160,26 @@ const Books = () => {
 
       <h2>Books</h2>
       <ul>
-          {books.map((book) => (
-            <li key={book._id} onClick={() => navigate(`/books/${book._id}`)}>
-              <strong>{book.title}</strong>: {book.description}
+        {books.map((book) => (
+          <li key={book._id}>
+            <strong>{book.title}</strong>: {book.description}{' '}
+            {book.addedBy && <span>(Added by {book.addedBy})</span>}
+            <button onClick={() => handleBookClick(book._id, book.addedBy)}>
+              View Details
+            </button>
+            {currentUser && (
+              <span>
+                {book.favorites ? 'Already in Favorites' : (
+                  <button onClick={() => handleAddFavorite(book._id)}>
+                    Add to Favorites
+                  </button>
+                )}
+              </span>
+            )}
           </li>
         ))}
       </ul>
+
       <h2>Logout</h2>
       <button onClick={handleLogout}>Logout</button>
     </div>

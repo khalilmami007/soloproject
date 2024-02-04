@@ -10,4 +10,5 @@ module.exports=(app)=>{
     app.put("/api/book/:BookId", bookcontroller.updateExistingBook)
     app.post("/api/book", bookcontroller.CreateNewBook)
     app.delete("/api/book/:BookId", bookcontroller.deleteAnExistingBook)
+    app.get('/api/book' ,bookcontroller.fetchBooks);
 }

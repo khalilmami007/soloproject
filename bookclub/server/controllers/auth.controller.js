@@ -73,3 +73,36 @@ exports.logout = (req, res) => {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   };
+
+
+
+  module.exports.getCurrentUser = async (req, res) => {
+    try {
+      console.log('User ID from token:', req.user.id);
+      console.log('req.user:', req.user);
+  
+      const currentUser = await RegisterSchema.findById(req.user.id);
+  
+      console.log('Retrieved user:', currentUser);
+  
+      if (!currentUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      res.json(currentUser);
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  };
+  
+
+
+
+
+
+
+
+
+
+

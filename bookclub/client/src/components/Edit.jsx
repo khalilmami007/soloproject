@@ -1,4 +1,3 @@
-// UpdateBook.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -10,6 +9,9 @@ const UpdateBook = () => {
   const [book, setBook] = useState({
     title: '',
     description: '',
+    addedBy: '',
+    createdAt: '',
+    updatedAt: '',
   });
 
   useEffect(() => {
@@ -28,8 +30,6 @@ const UpdateBook = () => {
 
   const handleUpdateBook = async () => {
     try {
-        console.log('Updating book with ID:', BookId);
-    console.log('Update data:', book);
       // Retrieve the token from localStorage
       const token = localStorage.getItem('authToken');
 
@@ -95,6 +95,18 @@ const UpdateBook = () => {
           onChange={handleInputChange}
           required
         ></textarea>
+      </label>
+      <br />
+      <label>
+        Added By: {book.addedBy}
+      </label>
+      <br />
+      <label>
+        Created On: {new Date(book.createdAt).toLocaleString()}
+      </label>
+      <br />
+      <label>
+        Updated On: {new Date(book.updatedAt).toLocaleString()}
       </label>
       <br />
       <button onClick={handleUpdateBook}>Update Book</button>

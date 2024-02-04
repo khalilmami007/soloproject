@@ -1,28 +1,39 @@
 const BooksSchema=require("../models/book.model");
 const verifyToken=require("../middlewares/authMiddleware");
+const User = require("../models/auth.model");
 
 
 
 
 //create new book 
 
-module.exports.CreateNewBook = (req, res) => {
+
+module.exports.CreateNewBook = async (req, res) => {
     // Use the verifyToken middleware to protect this route
     verifyToken(req, res, async () => {
       try {
         // Access the user from req.user (provided by verifyToken)
         const user = req.user;
   
+        // Fetch the user's full name
+        const addedByUser = await User.findById(user.id);
+  
         // Create a new book with the user information
         const newBook = new BooksSchema({
           title: req.body.title,
           description: req.body.description,
-          addedBy: user ? user.id : null, // Use user.id instead of user._id
-          // other book fields...
+          addedBy: addedByUser ? `${addedByUser.firstname} ${addedByUser.lastname}` : null,
+          favorites: true, // Set favorites to true when creating a new book
+          
         });
   
         // Save the new book
         const savedBook = await newBook.save();
+  
+        // Update the user's favorites by adding the new book's ID
+        if (user) {
+          await User.findByIdAndUpdate(user.id, { $addToSet: { favorites: savedBook._id } });
+        }
   
         console.log(savedBook);
         res.json({ newBook: savedBook });
@@ -32,7 +43,7 @@ module.exports.CreateNewBook = (req, res) => {
       }
     });
   };
-
+  
 //read all 
 module.exports.GetAllbooks = (req, res) => {
     BooksSchema.find()
@@ -91,3 +102,15 @@ module.exports.updateExistingBook = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+
+    module.exports.fetchBooks = async (req, res) => {
+        try {
+        const books = await BooksSchema.find().populate('addedByid'); // Populate the addedByid field
+        res.json(books);
+        } catch (error) {
+        console.error('Error fetching books:', error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+        }
+    };
+    

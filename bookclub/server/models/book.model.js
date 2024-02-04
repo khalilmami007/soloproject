@@ -13,8 +13,16 @@ const Books=new mongoose.Schema(
 
         },
         addedBy: {
+            type: String,  // Change the type to String
+    default: null,  // Provide a default value if needed
+          },
+          addedByUserId:{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'RegisterSchema', // Change this to 'RegisterSchema'
+          },
+          favorites: {
+            type: Boolean,
+            default: false,
           },
     },{timestamps:true}
 );

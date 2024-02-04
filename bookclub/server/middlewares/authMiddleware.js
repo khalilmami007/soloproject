@@ -3,17 +3,24 @@ const jwt = require('jsonwebtoken');
 const verifyToken = (req, res, next) => {
   const token = req.header('Authorization');
 
+  console.log('Received Token:', token);
+
   if (!token) {
     return res.status(401).json({ message: 'No token, authorization denied' });
   }
 
   try {
-    const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
+    const tokenWithoutBearer = token.split(' ')[1];
+    console.log('Token after split:', tokenWithoutBearer);
+
+    const decoded = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
     console.log('Decoded Token:', decoded);
-    req.user = decoded; // Attach the user to the request object
+
+    req.user = { id: decoded.RegisterId }; // Update to use 'id'
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Token is not valid' });
+    console.error('Token verification error:', error);
+    res.status(401).json({ message: 'Unauthorized: Invalid token' });
   }
 };
 
