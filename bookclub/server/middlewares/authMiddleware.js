@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
     const decoded = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
     console.log('Decoded Token:', decoded);
 
-    req.user = { id: decoded.RegisterId }; // Update to use 'id'
+    req.user = { id: decoded.RegisterId }; 
     next();
   } catch (error) {
     console.error('Token verification error:', error);

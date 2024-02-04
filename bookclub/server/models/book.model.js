@@ -20,9 +20,9 @@ const Books=new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'RegisterSchema', // Change this to 'RegisterSchema'
           },
-          favorites: {
-            type: Boolean,
-            default: false,
+        favorites: {
+            type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RegisterSchema' }],
+            default: [],
           },
     },{timestamps:true}
 );

@@ -99,26 +99,24 @@ const Books = () => {
   const handleAddFavorite = async (bookId) => {
     try {
       const token = localStorage.getItem('authToken');
-  
+
       // Add the book to favorites
       const response = await axios.post(
-        'http://localhost:5000/api/addFavorite',
+        `http://localhost:5000/api/addFavorite/${bookId}`,
+        {},
         {
-          bookId: bookId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         }
-      );
-  
+    );
+
       // Check if the book is added to favorites (response.data.favorites is true)
       if (response.data.favorites === true) {
         // Update the current user's favorites
         setCurrentUser((prevUser) => ({
           ...prevUser,
-          favorites: true, // Set favorites to true
+          favorites: true,
         }));
       } else {
         // Handle the case when the book is not added to favorites
@@ -128,6 +126,7 @@ const Books = () => {
       console.error('Error adding favorite:', error.message);
     }
   };
+
   return (
     <div>
       {currentUser && <h2>Welcome, {currentUser.firstname} {currentUser.lastname}!</h2>}
@@ -161,15 +160,14 @@ const Books = () => {
       <h2>Books</h2>
       <ul>
         {books.map((book) => (
-          <li key={book._id}>
+          <li key={book._id} onClick={() => handleBookClick(book._id, book.addedBy)}>
             <strong>{book.title}</strong>: {book.description}{' '}
             {book.addedBy && <span>(Added by {book.addedBy})</span>}
-            <button onClick={() => handleBookClick(book._id, book.addedBy)}>
-              View Details
-            </button>
             {currentUser && (
               <span>
-                {book.favorites ? 'Already in Favorites' : (
+                {book.favorites ? (
+                  <span style={{ color: 'green' }}>Already in Favorites</span>
+                ) : (
                   <button onClick={() => handleAddFavorite(book._id)}>
                     Add to Favorites
                   </button>

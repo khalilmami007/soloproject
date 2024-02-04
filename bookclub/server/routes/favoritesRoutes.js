@@ -8,6 +8,10 @@ const authMiddleware = require('../middlewares/authMiddleware'); // Assuming you
 router.use(authMiddleware);
 
 // Route to add a favorite
-router.post('/addFavorite', favoritesController.addFavorite);
+router.post('/addFavorite/:bookId', favoritesController.addFavorite);
+
+// Route to get users who like the same book
+router.get('/usersWhoLike/:bookId', favoritesController.usersWhoLike);
+
 
 module.exports = router;
